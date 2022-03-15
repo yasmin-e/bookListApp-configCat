@@ -12,7 +12,13 @@ export default function Book() {
 
   const addBookHandler = (e) => {
     e.preventDefault();
-    setBookList([...bookList, book]);
+    setBookList([...bookList,
+      {
+        id: (bookList.length + 1),
+        title: book.title,
+        author: book.author,
+      },
+    ]);
     setBook({});
   };
 
@@ -20,15 +26,19 @@ export default function Book() {
     localStorage.setItem('bookList', JSON.stringify(bookList));
   }, [bookList]);
 
+  const sortBooks = (sorting) => (sorting === 'BY_DEFAULT' ? bookList
+    : sorting === 'REVERSE' ? bookList.reverse()
+      : bookList);
+
   return (
     <div className="main">
       <div className="bookList">
         <h1>Book list</h1>
         {
-            bookList.map((x, id) => (
+            sortBooks('BY_DEFAULT').map((x) => (
               <p key={x.id}>
                 (
-                {id + 1}
+                {x.id}
                 )
                 {' '}
                 {x.title}
@@ -36,6 +46,7 @@ export default function Book() {
                 by
                 {' '}
                 {x.author}
+
               </p>
             ))
         }
