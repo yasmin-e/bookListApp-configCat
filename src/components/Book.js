@@ -26,7 +26,7 @@ export default function Book() {
                 <h1>Book list</h1>
                 {
                     bookList.map((book, id) => {
-                        return <p key={id}>{book.title} by {book.author}</p>
+                        return <p key={id}>({id + 1}) {book.title} by {book.author}</p>
                     })
                 }
                 <button 
