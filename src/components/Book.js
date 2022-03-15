@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import * as configcat from 'configcat-js';
 import './Book.css';
 
 const getBookListFromLocalStorage = () => {
@@ -6,9 +7,12 @@ const getBookListFromLocalStorage = () => {
   return data ? JSON.parse(data) : [];
 };
 
+const sdkKey = 'mwbaCBCQ4EyCinyHLrOpWw/S2sERkguckuEofREFPD5eQ';
+
 export default function Book() {
   const [bookList, setBookList] = useState(getBookListFromLocalStorage());
   const [book, setBook] = useState({ id: null, title: '', author: '' });
+  const [sortedMode, setSortedMode] = useState('');
 
   const addBookHandler = (e) => {
     e.preventDefault();
@@ -22,20 +26,26 @@ export default function Book() {
     setBook({});
   };
 
+  const sortedBooks = sortedMode === 'on' ? [...bookList.reverse()] : bookList;
+
   useEffect(() => {
     localStorage.setItem('bookList', JSON.stringify(bookList));
   }, [bookList]);
 
-  const sortBooks = (sorting) => (sorting === 'BY_DEFAULT' ? bookList
-    : sorting === 'REVERSE' ? bookList.reverse()
-      : bookList);
+  useEffect(() => {
+    const configCatClient = configcat.createClient(sdkKey);
+    configCatClient.getValue('sorterFeature', false, (value) => { console.log(value); return value ? setSortedMode('on') : setSortedMode('off'); });
+  }, [sortedMode, sortedBooks]);
+
+  console.log(`sorted mode : ${sortedMode}`);
+  console.log(`sorted books : ${JSON.stringify(sortedBooks)}`);
 
   return (
     <div className="main">
       <div className="bookList">
         <h1>Book list</h1>
         {
-            sortBooks('BY_DEFAULT').map((x) => (
+            sortedBooks.map((x) => (
               <p key={x.id}>
                 (
                 {x.id}
@@ -46,7 +56,6 @@ export default function Book() {
                 by
                 {' '}
                 {x.author}
-
               </p>
             ))
         }
