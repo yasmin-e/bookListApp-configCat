@@ -30,9 +30,11 @@ export default function Book() {
                 (
                 {id + 1}
                 )
+                {' '}
                 {x.title}
                 {' '}
                 by
+                {' '}
                 {x.author}
               </p>
             ))
@@ -64,7 +66,7 @@ export default function Book() {
               const { name, value } = e.target;
               setBook({ ...book, [name]: value });
             }}
-            value={book.title || ''}
+            value={book.title ? book.title : ''}
           />
           <br />
           <input
@@ -78,7 +80,7 @@ export default function Book() {
               const { name, value } = e.target;
               setBook({ ...book, [name]: value });
             }}
-            value={book.author || ''}
+            value={book.author ? book.author : ''}
           />
           <br />
           <br />
