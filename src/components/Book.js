@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import * as configcat from 'configcat-js';
 import './Book.css';
 
@@ -12,7 +12,7 @@ const sdkKey = 'mwbaCBCQ4EyCinyHLrOpWw/S2sERkguckuEofREFPD5eQ';
 export default function Book() {
   const [bookList, setBookList] = useState(getBookListFromLocalStorage());
   const [book, setBook] = useState({ id: null, title: '', author: '' });
-  const [sortedMode, setSortedMode] = useState('');
+  const [sortedMode, setSortedMode] = useState(false);
 
   const addBookHandler = (e) => {
     e.preventDefault();
@@ -26,39 +26,57 @@ export default function Book() {
     setBook({});
   };
 
-  const sortedBooks = sortedMode === 'on' ? [...bookList.reverse()] : bookList;
+  const handleValue = () => {
+    configCatClient.getValueAsync('sorterFeature', false).then((value) => {
+      setSortedMode(value);
+    });
+  };
 
-  useEffect(() => {
-    localStorage.setItem('bookList', JSON.stringify(bookList));
-  }, [bookList]);
+  let configCatClient = configcat.createClientWithAutoPoll(
+    sdkKey,
+    {
+      pollIntervalSeconds: 20,
+      configChanged: () => {
+        handleValue();
+      },
+    },
+  );
 
-  useEffect(() => {
-    const configCatClient = configcat.createClient(sdkKey);
-    configCatClient.getValue('sorterFeature', false, (value) => { console.log(value); return value ? setSortedMode('on') : setSortedMode('off'); });
-  }, [sortedMode, sortedBooks]);
+  handleValue();
 
-  console.log(`sorted mode : ${sortedMode}`);
-  console.log(`sorted books : ${JSON.stringify(sortedBooks)}`);
+  localStorage.setItem('bookList', JSON.stringify(bookList));
 
   return (
     <div className="main">
       <div className="bookList">
         <h1>Book list</h1>
-        {
-            sortedBooks.map((x) => (
-              <p key={x.id}>
-                (
-                {x.id}
-                )
-                {' '}
-                {x.title}
-                {' '}
-                by
-                {' '}
-                {x.author}
-              </p>
-            ))
-        }
+        { sortedMode === true
+          ? bookList.reverse().map((x) => (
+            <p key={x.id}>
+              (
+              {x.id}
+              )
+              {' '}
+              {x.title}
+              {' '}
+              by
+              {' '}
+              {x.author}
+            </p>
+          ))
+          : bookList.map((x) => (
+            <p key={x.id}>
+              (
+              {x.id}
+              )
+              {' '}
+              {x.title}
+              {' '}
+              by
+              {' '}
+              {x.author}
+            </p>
+          ))}
         <button
           type="button"
           className="clear-btn"
